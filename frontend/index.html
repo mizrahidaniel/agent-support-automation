@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Portal - Customer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Customer Support Portal</h1>
+            <p class="text-gray-600 mt-2">Manage your API keys, view usage, and get help</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="flex space-x-8">
+                <button onclick="showTab('overview')" 
+                        class="tab-btn py-2 px-1 border-b-2 font-medium text-sm active">
+                    Overview
+                </button>
+                <button onclick="showTab('keys')" 
+                        class="tab-btn py-2 px-1 border-b-2 font-medium text-sm">
+                    API Keys
+                </button>
+                <button onclick="showTab('usage')" 
+                        class="tab-btn py-2 px-1 border-b-2 font-medium text-sm">
+                    Usage
+                </button>
+                <button onclick="showTab('billing')" 
+                        class="tab-btn py-2 px-1 border-b-2 font-medium text-sm">
+                    Billing
+                </button>
+                <button onclick="showTab('support')" 
+                        class="tab-btn py-2 px-1 border-b-2 font-medium text-sm">
+                    Support
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="overview-tab" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-gray-500 text-sm font-medium">Today's Usage</h3>
+                    <p id="usage-today" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                    <p class="text-sm text-gray-600 mt-1">API requests</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-gray-500 text-sm font-medium">This Month</h3>
+                    <p id="usage-month" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                    <p class="text-sm text-gray-600 mt-1">API requests</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-gray-500 text-sm font-medium">Active Keys</h3>
+                    <p id="active-keys" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                    <p class="text-sm text-gray-600 mt-1">Not revoked</p>
+                </div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-blue-800 text-sm">
+                    <strong>Quick Help:</strong> Navigate tabs above to manage API keys, view detailed usage, check billing history, or create support tickets.
+                </p>
+            </div>
+        </div>
+
+        <div id="keys-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold">API Keys</h2>
+                    <button onclick="createAPIKey()" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        Create New Key
+                    </button>
+                </div>
+                <div id="keys-list" class="p-6">
+                    <p class="text-gray-500">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="usage-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-6">Usage Statistics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-gray-700 font-medium mb-2">Current Period</h3>
+                        <dl class="space-y-2">
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">Today:</dt>
+                                <dd id="usage-detail-today" class="font-semibold">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">This Month:</dt>
+                                <dd id="usage-detail-month" class="font-semibold">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">All Time:</dt>
+                                <dd id="usage-detail-all" class="font-semibold">-</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-700 font-medium mb-2">Rate Limiting</h3>
+                        <dl class="space-y-2">
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">Remaining Today:</dt>
+                                <dd id="rate-limit-remaining" class="font-semibold">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-gray-600">Resets At:</dt>
+                                <dd id="rate-limit-reset" class="text-sm text-gray-600">-</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="billing-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold">Billing History</h2>
+                </div>
+                <div id="billing-list" class="p-6">
+                    <p class="text-gray-500">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="support-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Create Ticket -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Create Ticket</h2>
+                    <form id="ticket-form" onsubmit="createTicket(event)">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Subject</label>
+                            <input type="text" id="ticket-subject" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Category</label>
+                            <select id="ticket-category" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="general">General</option>
+                                <option value="api">API Issues</option>
+                                <option value="billing">Billing</option>
+                                <option value="technical">Technical Support</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Message</label>
+                            <textarea id="ticket-message" required rows="5"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Submit Ticket
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tickets List -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Your Tickets</h2>
+                    <div id="tickets-list">
+                        <p class="text-gray-500">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8001';
+        const CUSTOMER_ID = 'demo-customer'; // In production, from auth
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active', 'border-blue-600', 'text-blue-600');
+                el.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            event.target.classList.add('active', 'border-blue-600', 'text-blue-600');
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Load data for active tab
+            if (tabName === 'keys') loadAPIKeys();
+            if (tabName === 'usage') loadUsageStats();
+            if (tabName === 'billing') loadBillingHistory();
+            if (tabName === 'support') loadTickets();
+        }
+
+        // API Helpers
+        async function apiCall(endpoint, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-Customer-ID': CUSTOMER_ID,
+                ...options.headers
+            };
+            
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.statusText}`);
+            }
+            
+            return response.json();
+        }
+
+        // Overview
+        async function loadOverview() {
+            try {
+                const usage = await apiCall('/api/usage/stats');
+                const keys = await apiCall('/api/keys/list');
+                
+                document.getElementById('usage-today').textContent = usage.today.toLocaleString();
+                document.getElementById('usage-month').textContent = usage.this_month.toLocaleString();
+                document.getElementById('active-keys').textContent = keys.keys.filter(k => !k.revoked).length;
+            } catch (error) {
+                console.error('Error loading overview:', error);
+            }
+        }
+
+        // API Keys
+        async function loadAPIKeys() {
+            try {
+                const data = await apiCall('/api/keys/list');
+                const container = document.getElementById('keys-list');
+                
+                if (data.keys.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No API keys yet. Create one to get started.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.keys.map(key => `
+                    <div class="border-b border-gray-200 py-4 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium">${key.name || 'API Key'}</p>
+                            <p class="text-sm text-gray-500">Created: ${new Date(key.created_at).toLocaleDateString()}</p>
+                            ${key.revoked ? '<span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Revoked</span>' : ''}
+                        </div>
+                        ${!key.revoked ? `<button onclick="revokeKey(${key.key_id})" class="text-red-600 hover:text-red-800 text-sm">Revoke</button>` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('keys-list').innerHTML = '<p class="text-red-500">Error loading keys</p>';
+            }
+        }
+
+        async function createAPIKey() {
+            const name = prompt('Name for this API key (optional):');
+            try {
+                const result = await apiCall('/api/keys/create', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        customer_id: CUSTOMER_ID,
+                        name: name || 'API Key'
+                    })
+                });
+                
+                alert(`API Key Created!\n\n${result.api_key}\n\nSave this key - it won't be shown again.`);
+                loadAPIKeys();
+                loadOverview();
+            } catch (error) {
+                alert('Error creating API key');
+            }
+        }
+
+        async function revokeKey(keyId) {
+            if (!confirm('Revoke this API key? This cannot be undone.')) return;
+            
+            try {
+                await apiCall(`/api/keys/${keyId}`, { method: 'DELETE' });
+                loadAPIKeys();
+                loadOverview();
+            } catch (error) {
+                alert('Error revoking key');
+            }
+        }
+
+        // Usage
+        async function loadUsageStats() {
+            try {
+                const data = await apiCall('/api/usage/stats');
+                
+                document.getElementById('usage-detail-today').textContent = data.today.toLocaleString();
+                document.getElementById('usage-detail-month').textContent = data.this_month.toLocaleString();
+                document.getElementById('usage-detail-all').textContent = data.all_time.toLocaleString();
+                document.getElementById('rate-limit-remaining').textContent = data.current_rate_limit.toLocaleString();
+                document.getElementById('rate-limit-reset').textContent = 
+                    data.rate_limit_reset ? new Date(data.rate_limit_reset).toLocaleString() : 'N/A';
+            } catch (error) {
+                console.error('Error loading usage:', error);
+            }
+        }
+
+        // Billing
+        async function loadBillingHistory() {
+            try {
+                const data = await apiCall('/api/billing/history');
+                const container = document.getElementById('billing-list');
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No billing history yet.</p>';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2">Date</th>
+                                <th class="text-left py-2">Invoice</th>
+                                <th class="text-left py-2">Description</th>
+                                <th class="text-right py-2">Amount</th>
+                                <th class="text-right py-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(invoice => `
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-3">${new Date(invoice.date).toLocaleDateString()}</td>
+                                    <td class="py-3 text-sm text-gray-600">${invoice.invoice_id}</td>
+                                    <td class="py-3">${invoice.description}</td>
+                                    <td class="py-3 text-right font-medium">$${invoice.amount.toFixed(2)}</td>
+                                    <td class="py-3 text-right">
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">${invoice.status}</span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                document.getElementById('billing-list').innerHTML = '<p class="text-red-500">Error loading billing history</p>';
+            }
+        }
+
+        // Support
+        async function loadTickets() {
+            try {
+                const data = await apiCall('/api/tickets/list');
+                const container = document.getElementById('tickets-list');
+                
+                if (data.tickets.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No tickets yet.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.tickets.map(ticket => `
+                    <div class="border-b border-gray-200 py-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-medium">${ticket.subject}</p>
+                                <p class="text-sm text-gray-500 mt-1">${new Date(ticket.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded ${
+                                ticket.status === 'open' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                            }">${ticket.status}</span>
+                        </div>
+                        ${ticket.ai_responded ? '<p class="text-xs text-green-600 mt-2">✓ AI responded</p>' : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('tickets-list').innerHTML = '<p class="text-red-500">Error loading tickets</p>';
+            }
+        }
+
+        async function createTicket(event) {
+            event.preventDefault();
+            
+            const subject = document.getElementById('ticket-subject').value;
+            const category = document.getElementById('ticket-category').value;
+            const message = document.getElementById('ticket-message').value;
+            
+            try {
+                const result = await apiCall('/api/tickets/create', {
+                    method: 'POST',
+                    body: JSON.stringify({ subject, category, message })
+                });
+                
+                alert(result.ai_responded 
+                    ? 'Ticket created! AI has provided an automated response.'
+                    : 'Ticket created! Our team will respond soon.');
+                
+                document.getElementById('ticket-form').reset();
+                loadTickets();
+            } catch (error) {
+                alert('Error creating ticket');
+            }
+        }
+
+        // Initialize
+        loadOverview();
+    </script>
+</body>
+</html>
